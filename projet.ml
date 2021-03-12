@@ -1,2 +1,3 @@
-#load "module/expression_scanner.cmo";;
+#directory "module";;
+#load "expression_scanner.cmo";;
 open Expression_scanner;;
