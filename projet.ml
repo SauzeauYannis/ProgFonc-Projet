@@ -1,12 +1,12 @@
 (* Décommenter la commande directory selon votre verison d'ocaml *)
 
-(* #directory "module/ocaml-4.02.1+ocp1/";; *)
+#directory "module/ocaml-4.02.1+ocp1/";;
 
 (* #directory "module/ocaml-4.02.3/";; *)
 
 (* #directory "module/ocaml-4.05.0/";; *)
 
-#directory "module/ocaml-4.08.1/";;
+(* #directory "module/ocaml-4.08.1/";; *)
 
 (* #directory "module/ocaml-4.10.0/";; *)
 
@@ -74,8 +74,63 @@ let parse token_list =
           push (Cst(n)) stack;
           parse_aux tl
        | _ -> failwith "l'expression de Lukasiewicz est mal formée"
-  in
-  parse_aux token_list
+  in parse_aux token_list
 ;;
-  
+
+(* Test d'expressions correctes *)
 parse (string_to_token_list "34 56 2 + x * -;");;
+parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;");;
+parse (string_to_token_list "34;");;
+
+(* Test d'expressions incorrectes *)
+parse (string_to_token_list "34 56 2 + x * -");;
+parse (string_to_token_list "34 56 2 ; + x * -");;
+parse (string_to_token_list "34 56 2 + + x * -");;
+parse (string_to_token_list "");;
+parse (string_to_token_list ";");;
+parse (string_to_token_list "34");;
+
+(* ------------------------------ Simplification sur l'arbre ------------------------------ *)
+
+(* Evaluation d'une sous-expression de constantes enti�res *)
+let evaluate operator n1 n2 =
+  match operator with
+  | Plus -> Cst(n1 + n2)
+  | Minus -> Cst(n1 - n2)
+  | Mult -> Cst(n1 * n2)
+  | Div -> Cst(n1 / n2)
+;;
+
+evaluate Plus 5 9;;
+evaluate Div 8 2;;
+
+(* Evaluation d'une sous-expression de variables *)
+let evaluate_var operator x y =
+  if x = y
+  then match operator with
+       | Minus -> Cst(0)
+       | Div -> Cst(1)
+       | _ -> Binary(operator, Var(x), Var(y))
+  else Binary(operator, Var(x), Var(y))
+;;
+
+evaluate_var Minus 'x' 'x';;
+evaluate_var Div 'x' 'y';;
+
+(* Evaluation d'une sous-expression *)
+let simplification tree =
+  match tree with
+  | Binary(operator, Cst(n1), Cst(n2)) -> evaluate operator n1 n2
+  | Binary(operator, Var(x), Var(y)) -> evaluate_var operator x y
+  | Binary(Mult, Cst(1), Var(x))
+    | Binary(Mult, Var(x), Cst(1))
+    | Binary(Plus, Cst(0), Var(x))
+    | Binary(Plus, Var(x), Cst(0)) -> Var(x)
+  | _ -> tree
+;;
+
+simplification (Binary(Mult, Cst(3), Cst(4)));;
+simplification (Binary(Mult, Cst(1), Var('x')));;
+simplification (Binary(Plus, Var('y'), Cst(0)));;
+simplification (Binary(Div, Var('x'), Var('x')));;
+
