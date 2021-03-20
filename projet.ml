@@ -105,27 +105,34 @@ evaluate Plus 5 9;;
 evaluate Div 8 2;;
 
 (* Evaluation d'une sous-expression de variables *)
-let evaluate_var operator x y =
+let eval_sub_expr operator x y =
   if x = y
   then match operator with
        | Minus -> Cst(0)
        | Div -> Cst(1)
-       | _ -> Binary(operator, Var(x), Var(y))
-  else Binary(operator, Var(x), Var(y))
+       | _ -> Binary(operator, x, y)
+  else
+    match (operator, x, y) with
+    | (Mult, Cst(1), z)
+      | (Mult, z, Cst(1))
+      | (Plus, Cst(0), z)
+      | (Plus, z, Cst(0)) -> z
+    | (Mult, Cst(0), _)
+      | (Mult, _, Cst(0)) -> Cst(0)
+    | _ -> Binary(operator, x, y)
 ;;
 
-evaluate_var Minus 'x' 'x';;
-evaluate_var Div 'x' 'y';;
+eval_sub_expr Minus (Var('x')) (Var('x'));;
+eval_sub_expr Div (Var('x')) (Var('y'));;
 
 (* Evaluation d'une sous-expression *)
-let simplification tree =
+let rec simplification tree =
   match tree with
   | Binary(operator, Cst(n1), Cst(n2)) -> evaluate operator n1 n2
-  | Binary(operator, Var(x), Var(y)) -> evaluate_var operator x y
-  | Binary(Mult, Cst(1), Var(x))
-    | Binary(Mult, Var(x), Cst(1))
-    | Binary(Plus, Cst(0), Var(x))
-    | Binary(Plus, Var(x), Cst(0)) -> Var(x)
+  | Binary(operator, x, y) -> (
+    match (simplification x, simplification y) with
+    | (Cst(n1), Cst(n2)) -> evaluate operator n1 n2
+    | (simpl_x, simpl_y) -> eval_sub_expr operator simpl_x simpl_y)
   | _ -> tree
 ;;
 
@@ -133,4 +140,9 @@ simplification (Binary(Mult, Cst(3), Cst(4)));;
 simplification (Binary(Mult, Cst(1), Var('x')));;
 simplification (Binary(Plus, Var('y'), Cst(0)));;
 simplification (Binary(Div, Var('x'), Var('x')));;
+simplification (Unary(Var('x')));;
 
+simplification (parse (string_to_token_list "34 56 2 + x * -;"));;
+simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
+
+(* TODO: ajouter d'autres tests *)
