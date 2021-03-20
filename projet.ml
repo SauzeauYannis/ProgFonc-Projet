@@ -1,6 +1,6 @@
-(* DÃ©commenter la commande directory selon votre verison d'ocaml *)
+(* Décommenter la commande directory selon votre verison d'ocaml *)
 
-#directory "module/ocaml-4.02.1+ocp1/";;
+(* #directory "module/ocaml-4.02.1+ocp1/";; *)
 
 (* #directory "module/ocaml-4.02.3/";; *)
 
@@ -8,7 +8,7 @@
 
 (* #directory "module/ocaml-4.08.1/";; *)
 
-(* #directory "module/ocaml-4.10.0/";; *)
+#directory "module/ocaml-4.10.0/";;
 
 (* #directory "module/ocaml-4.11.1/";; *)
 
@@ -90,7 +90,7 @@ parse (string_to_token_list "");;
 parse (string_to_token_list ";");;
 parse (string_to_token_list "34");;
 
-(* ------------------------------ Simplification sur l'arbre ------------------------------ *)
+(* ------------------------------ Simplification sur l'arbre ------------------------------ *)  
 
 (* Evaluation d'une sous-expression de constantes entières *)
 let evaluate operator n1 n2 =
@@ -107,10 +107,11 @@ evaluate Div 8 2;;
 (* Evaluation d'une sous-expression de variables *)
 let eval_sub_expr operator x y =
   if x = y
-  then match operator with
-       | Minus -> Cst(0)
-       | Div -> Cst(1)
-       | _ -> Binary(operator, x, y)
+  then
+    match operator with
+    | Minus -> Cst(0)
+    | Div -> Cst(1)
+    | _ -> Binary(operator, x, y)
   else
     match (operator, x, y) with
     | (Mult, Cst(1), z)
@@ -123,7 +124,9 @@ let eval_sub_expr operator x y =
 ;;
 
 eval_sub_expr Minus (Var('x')) (Var('x'));;
+eval_sub_expr Plus (Cst(0)) (Var('x'));;
 eval_sub_expr Div (Var('x')) (Var('y'));;
+eval_sub_expr Mult(Cst(0)) (Var('x'));;
 
 (* Evaluation d'une sous-expression *)
 let rec simplification tree =
@@ -146,3 +149,6 @@ simplification (parse (string_to_token_list "34 56 2 + x * -;"));;
 simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 
 (* TODO: ajouter d'autres tests *)
+
+(* ------------------------------ Affichage des expressions ------------------------------ *)
+
