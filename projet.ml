@@ -201,3 +201,14 @@ string_of_tree (parse (string_to_token_list "34 56 2 + x * -;"));;
 string_of_tree (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 string_of_tree (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 string_of_tree (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
+
+
+(* Affichage sur le terminal de l'expression *)
+let print_exp tree =
+  printf "%s\n" (string_of_tree tree)
+;;
+
+print_exp (parse (string_to_token_list "34 56 2 + x * -;"));;
+print_exp (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
+print_exp (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
+print_exp (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
