@@ -152,3 +152,52 @@ simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 
 (* ------------------------------ Affichage des expressions ------------------------------ *)
 
+(* Ouvre le module Printf pour effectuer un affichage sur un terminal *)
+open Printf;;
+#show Printf;;
+
+(* Test d'un printf en Ocaml *)
+let _ = printf "Hello World !\n";;
+
+let test_s = "Hello World !";;
+let _ = printf "%s\n" test_s;;
+
+(* Conversion un operateur en string *)
+let string_of_operator op =
+  match op with
+  | Plus -> " + "
+  | Minus -> " - "
+  | Mult -> " * "
+  | Div -> " / "
+;;
+
+string_of_operator Plus;;
+string_of_operator Minus;;
+string_of_operator Mult;;
+string_of_operator Div;;
+
+(* Ouverture du module Char pour utiliser la fonction 'escaped' *)
+open Char;;
+
+(* Conversion d'un arbre en string *)
+let rec string_of_tree tree =
+  match tree with
+  | Cst(n) -> string_of_int n
+  | Var(x) -> escaped x
+  | Unary(exp) -> "(-"^(string_of_tree exp)^")"
+  | Binary(op, x, y) ->
+     match op with
+     | Plus | Minus -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+     | _ ->
+        match (x, y) with
+        | (Binary(_,_,_), Binary(_,_,_)) -> "("^(string_of_tree x)^")"^(string_of_operator op)^"("^(string_of_tree y)^")"
+        | (Binary(_,_,_), _) -> "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
+        | (_, Binary(_,_,_)) -> (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
+                              
+        | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+;;
+
+string_of_tree (parse (string_to_token_list "34 56 2 + x * -;"));;
+string_of_tree (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
+string_of_tree (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
+string_of_tree (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
