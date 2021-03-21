@@ -222,8 +222,24 @@ open List;;
 
 (* Fonction principale *)
 let main input =
-  let token_list = string_to_token_list input in
-  fold_left (fun (p, l) elem ->
-      let cl = nth l p in
-      if elem = End
-      then (p + 1)
+  let input_list = string_to_token_list input in
+  let (temp_list, token_list) =
+    fold_right (fun elem (sub_list, list) ->
+        if elem = End && sub_list <> []
+        then ([End], sub_list::list)
+        else (elem::sub_list, list))
+      input_list ([], []) in
+  let num_exp = ref 1 in
+  map (fun elem ->
+      let tree = parse elem in
+      printf "Expression numéro %d avant simplification :\n" !num_exp;
+      print_exp tree;
+      let simpl_tree = simplification tree in
+      printf "Expression numéro %d après simplification :\n" !num_exp;
+      print_exp simpl_tree;
+      printf "\n";
+      num_exp := !num_exp + 1;)
+  (temp_list::token_list)
+;;
+
+main "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;";;
