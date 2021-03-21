@@ -1,16 +1,16 @@
 (* Décommenter la commande directory selon votre verison d'ocaml *)
 
-(* #directory "module/ocaml-4.02.1+ocp1/";; *)
+(* #directory "Module/ocaml-4.02.1+ocp1/";; *)
 
-(* #directory "module/ocaml-4.02.3/";; *)
+(* #directory "Module/ocaml-4.02.3/";; *)
 
-(* #directory "module/ocaml-4.05.0/";; *)
+(* #directory "Module/ocaml-4.05.0/";; *)
 
-(* #directory "module/ocaml-4.08.1/";; *)
+#directory "Module/ocaml-4.08.1/";;
 
-#directory "module/ocaml-4.10.0/";;
+(* #directory "Module/ocaml-4.10.0/";; *)
 
-(* #directory "module/ocaml-4.11.1/";; *)
+(* #directory "Module/ocaml-4.11.1/";; *)
 
 (* ----------------------------------- Analyse lexicale ----------------------------------- *)
 
@@ -18,7 +18,7 @@
 #load "expression_scanner.cmo";;
 open Expression_scanner;;
 
-(* Pour vÃ©rifier si le module est bien chargÃ© *)
+(* Pour vérifier si le module est bien chargÃ© *)
 #show Expression_scanner;;
 
 let test_token1 : token = Add;;            (* Expression_scanner.token = Add *)
@@ -193,7 +193,6 @@ let rec string_of_tree tree =
         | (Binary(_,_,_), Binary(_,_,_)) -> "("^(string_of_tree x)^")"^(string_of_operator op)^"("^(string_of_tree y)^")"
         | (Binary(_,_,_), _) -> "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
         | (_, Binary(_,_,_)) -> (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
-                              
         | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
 ;;
 
@@ -212,3 +211,19 @@ print_exp (parse (string_to_token_list "34 56 2 + x * -;"));;
 print_exp (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 print_exp (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 print_exp (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
+
+(* ----------------------------------- Programme final ----------------------------------- *)
+
+string_to_token_list "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;";;
+
+(* Ouvre le module Printf pour effectuer un affichage sur un terminal *)
+open List;;
+#show List;;
+
+(* Fonction principale *)
+let main input =
+  let token_list = string_to_token_list input in
+  fold_left (fun (p, l) elem ->
+      let cl = nth l p in
+      if elem = End
+      then (p + 1)
