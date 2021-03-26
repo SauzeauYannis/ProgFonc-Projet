@@ -176,30 +176,42 @@ string_of_operator Div;;
 open Char;;
 
 (* Conversion d'un arbre en string *)
-let rec string_of_tree tree =
+let string_of_tree tree =
+  let rec string_of_tree_aux tree first =
+    match tree with
+    | Cst(n) -> string_of_int n
+    | Var(x) -> escaped x
+    | Unary(exp) -> "(-" ^ (string_of_tree_aux exp false) ^ ")"
+    | Binary(op, x, y) ->
+       if first
+       then (string_of_tree_aux x false) ^ (string_of_operator op) ^ (string_of_tree_aux y false)
+       else "(" ^ (string_of_tree_aux x false) ^ (string_of_operator op) ^ (string_of_tree_aux y false) ^ ")"
+  in string_of_tree_aux tree true
+;;
+
+let rec string_of_tree_final tree =
   match tree with
   | Cst(n) -> string_of_int n
   | Var(x) -> escaped x
   | Unary(exp) -> (
     match exp with
-    | Cst(_) | Var(_) -> "(-"^(string_of_tree exp)^")"
-    | _ -> "(-("^(string_of_tree exp)^"))")
+    | Cst(_) | Var(_) -> "(-" ^ (string_of_tree_final exp) ^ ")"
+    | _ -> "(-(" ^ (string_of_tree_final exp) ^ "))")
   | Binary(op, x, y) ->
      match op with
-     | Plus | Minus -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+     | Plus | Minus -> (string_of_tree_final x) ^ (string_of_operator op) ^ (string_of_tree_final y)
      | _ ->
         match (x, y) with
-        | (Binary(Plus,_,_), _) | (Binary(Minus,_,_), _) -> "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
-        | (_, Binary(Plus,_,_)) | (_, Binary(Minus,_,_)) -> (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
-        | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+        | (Binary(Plus,_,_), _) | (Binary(Minus,_,_), _) -> "(" ^ (string_of_tree_final x) ^ ")" ^ (string_of_operator op) ^ (string_of_tree_final y)
+        | (_, Binary(Plus,_,_)) | (_, Binary(Minus,_,_)) -> (string_of_tree_final x) ^ (string_of_operator op) ^ "(" ^ (string_of_tree_final y) ^ ")"
+        | _ -> (string_of_tree_final x) ^ (string_of_operator op) ^ (string_of_tree_final y)
 ;;
 
 string_of_tree (parse (string_to_token_list "34 56 2 + x * -;"));;
-string_of_tree (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
+string_of_tree_final (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 string_of_tree (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
-string_of_tree (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
-simplification (parse (string_to_token_list "a b * c * e f + *;"));;
-string_of_tree (simplification (parse (string_to_token_list "a b * c * e f + *;")));;
+string_of_tree_final (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
+string_of_tree_final (simplification (parse (string_to_token_list "a b * c * e f + *;")));;
 
 
 (* Affichage sur le terminal de l'expression *)
@@ -207,10 +219,14 @@ let print_exp tree =
   printf "%s\n" (string_of_tree tree)
 ;;
 
+let print_exp_final tree =
+  printf "%s\n" (string_of_tree_final tree)
+;;
+
 print_exp (parse (string_to_token_list "34 56 2 + x * -;"));;
-print_exp (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
+print_exp_final (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 print_exp (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
-print_exp (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
+print_exp_final (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
 
 (* ----------------------------------- Programme final ----------------------------------- *)
 
@@ -236,10 +252,10 @@ let main input =
       print_exp tree;
       let simpl_tree = simplification tree in
       printf "Expression numéro %d après simplification :\n" !num_exp;
-      print_exp simpl_tree;
+      print_exp_final simpl_tree;
       printf "\n";
       num_exp := !num_exp + 1;)
   (temp_list::token_list)
 ;;
 
-main "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;";;
+main "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;a b * c * e f + *;";;
