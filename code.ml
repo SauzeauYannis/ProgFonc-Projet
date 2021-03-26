@@ -19,9 +19,9 @@ open Expression_scanner;;
 (* Pour v�rifier si le module est bien chargé *)
 #show Expression_scanner;;
 
-let test_token1 : token = Add;;            (* Expression_scanner.token = Add *)
-let test_token2 : token = Variable('x');;  (* Expression_scanner.token = Variable 'x' *)
-let test_token3 : token = Number(2);;      (* Expression_scanner.token = Number 2 *)
+let _ : token = Add;;            (* Expression_scanner.token = Add *)
+let _ : token = Variable('x');;  (* Expression_scanner.token = Variable 'x' *)
+let _ : token = Number(2);;      (* Expression_scanner.token = Number 2 *)
 
 string_to_token_list "34 56 2 + x * -;";;  (* Expression_scanner.token list = [Number 34; Number 56; Number 2; Add; Variable 'x'; Multiply; Subtract; End] *)
 
@@ -48,7 +48,6 @@ let operator_of_token token =
   | _ -> failwith "le token n'est pas convertible en opérateur";;
 
 (* Analyse d'une expression de Lukasiewicz *)
-(* Type : token list -> tree *)
 let parse token_list =
   let stack : tree t = create() in
   let rec parse_aux(token_l : token list): tree =
@@ -177,31 +176,6 @@ string_of_operator Div;;
 open Char;;
 
 (* Conversion d'un arbre en string *)
-let rec string_of_tree tree =
-  match tree with
-  | Cst(n) -> string_of_int n
-  | Var(x) -> escaped x
-  | Unary(exp) -> "(-"^(string_of_tree exp)^")"
-  | Binary(op, x, y) ->
-     match op with
-     | Plus | Minus -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
-     | _ ->
-        match (x, y) with
-        | (Binary(op1,_,_), Binary(op2,_,_)) ->
-           if op = op1 && op = op2
-           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
-           else "("^(string_of_tree x)^")"^(string_of_operator op)^"("^(string_of_tree y)^")"
-        | (Binary(op1,_,_), _) -> 
-           if op = op1
-           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
-           else "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
-        | (_, Binary(op1,_,_)) ->
-           if op = op1
-           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
-           else (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
-        | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
-;;
-
 let rec string_of_tree tree =
   match tree with
   | Cst(n) -> string_of_int n
