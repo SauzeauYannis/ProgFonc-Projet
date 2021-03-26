@@ -129,7 +129,6 @@ eval_sub_expr Mult(Cst(0)) (Var('x'));;
 (* Evaluation d'une sous-expression *)
 let rec simplification tree =
   match tree with
-  | Binary(operator, Cst(n1), Cst(n2)) -> evaluate operator n1 n2
   | Binary(operator, x, y) -> (
     match (simplification x, simplification y) with
     | (Cst(n1), Cst(n2)) -> evaluate operator n1 n2
@@ -188,9 +187,36 @@ let rec string_of_tree tree =
      | Plus | Minus -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
      | _ ->
         match (x, y) with
-        | (Binary(_,_,_), Binary(_,_,_)) -> "("^(string_of_tree x)^")"^(string_of_operator op)^"("^(string_of_tree y)^")"
-        | (Binary(_,_,_), _) -> "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
-        | (_, Binary(_,_,_)) -> (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
+        | (Binary(op1,_,_), Binary(op2,_,_)) ->
+           if op = op1 && op = op2
+           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+           else "("^(string_of_tree x)^")"^(string_of_operator op)^"("^(string_of_tree y)^")"
+        | (Binary(op1,_,_), _) -> 
+           if op = op1
+           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+           else "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
+        | (_, Binary(op1,_,_)) ->
+           if op = op1
+           then (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+           else (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
+        | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+;;
+
+let rec string_of_tree tree =
+  match tree with
+  | Cst(n) -> string_of_int n
+  | Var(x) -> escaped x
+  | Unary(exp) -> (
+    match exp with
+    | Cst(_) | Var(_) -> "(-"^(string_of_tree exp)^")"
+    | _ -> "(-("^(string_of_tree exp)^"))")
+  | Binary(op, x, y) ->
+     match op with
+     | Plus | Minus -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
+     | _ ->
+        match (x, y) with
+        | (Binary(Plus,_,_), _) | (Binary(Minus,_,_), _) -> "("^(string_of_tree x)^")"^(string_of_operator op)^(string_of_tree y)
+        | (_, Binary(Plus,_,_)) | (_, Binary(Minus,_,_)) -> (string_of_tree x)^(string_of_operator op)^"("^(string_of_tree y)^")"
         | _ -> (string_of_tree x)^(string_of_operator op)^(string_of_tree y)
 ;;
 
@@ -198,6 +224,8 @@ string_of_tree (parse (string_to_token_list "34 56 2 + x * -;"));;
 string_of_tree (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 string_of_tree (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 string_of_tree (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
+simplification (parse (string_to_token_list "a b * c * e f + *;"));;
+string_of_tree (simplification (parse (string_to_token_list "a b * c * e f + *;")));;
 
 
 (* Affichage sur le terminal de l'expression *)
