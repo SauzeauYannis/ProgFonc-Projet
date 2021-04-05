@@ -28,7 +28,7 @@ Ce projet a été développé en binôme sous Ubuntu avec [GNU Emacs](https://ww
 
 ### Utilisation
 
-Sous linux lancer le programme 'exec_project'.
+Sous linux lancer le programme 'exec_project' avec la commande ocamlrun.
 
 Ensuite, le programme attend sur l'entrée standard une suite d'expressiond arithmétiques délimitées par des point-virgules sous la forme [notation polonaise inverse](https://fr.wikipedia.org/wiki/Notation_polonaise_inverse).
 
@@ -36,30 +36,40 @@ Un exemple d'utilisation :
 
 ```shell
 $ ./exec_project
-34 56 2 + x * -;                                      
+34 56 2 + x * -;
 x 3 + 5 7 + + 3 4 * 1 3 + / /;
-4 ~ 3 *;
+a b * c * e f + *;
+13 2 5 * 1 0 / - +;
 ^D
 ```
 
 Donne le résultat :
 
 ```
-Expression numéro 1 avant simplification :
-34 - (56 + 2) * x
-Expression numéro 1 après simplification :
+Expression numero 1 avant simplification :
+34 - ((56 + 2) * x)
+Expression numero 1 apres simplification :
 34 - 58 * x
 
-Expression numéro 2 avant simplification :
-(x + 3 + 5 + 7) / ((3 * 4) / (1 + 3))
-Expression numéro 2 après simplification :
+Expression numero 2 avant simplification :
+((x + 3) + (5 + 7)) / ((3 * 4) / (1 + 3))
+Expression numero 2 apres simplification :
 (x + 3 + 12) / 3
 
-Expression numéro 3 avant simplification :
-(-4) * 3
-Expression numéro 3 après simplification :
-(-4) * 3
+Expression numero 3 avant simplification :
+((a * b) * c) * (e + f)
+Expression numero 3 apres simplification :
+a * b * c * (e + f)
+
+Expression numero 4 avant simplification :
+13 + ((2 * 5) - (1 / 0))
+Expression numero 4 apres simplification :
+13 + 10 - 1 / 0
 ```
+
+Il est aussi possible d'utiliser le programme avec un interpréteur OCaml.
+Pour cela, il faut utiliser le fichier code.ml qui contient les fonctions ainsi qu'une série de tests pour chacun d'entre elles.
+Par défaut ce programme doit être interprété avec la version 4.08.1 d'OCaml, cependant 4 autres versions d'OCaml sont disponibles en décommentant la ligne correspondant à votre version d'OCaml.
 
 <a name="fr_cp"/>
 
@@ -106,30 +116,40 @@ An example of usage:
 
 ```shell
 $ ./exec_project
-34 56 2 + x * -;                                      
+34 56 2 + x * -;
 x 3 + 5 7 + + 3 4 * 1 3 + / /;
-4 ~ 3 *;
+a b * c * e f + *;
+13 2 5 * 1 0 / - +;
 ^D
 ```
 
 Gives the result:
 
 ```
-Expression numéro 1 avant simplification :
-34 - (56 + 2) * x
-Expression numéro 1 après simplification :
+Expression numero 1 avant simplification :
+34 - ((56 + 2) * x)
+Expression numero 1 apres simplification :
 34 - 58 * x
 
-Expression numéro 2 avant simplification :
-(x + 3 + 5 + 7) / ((3 * 4) / (1 + 3))
-Expression numéro 2 après simplification :
+Expression numero 2 avant simplification :
+((x + 3) + (5 + 7)) / ((3 * 4) / (1 + 3))
+Expression numero 2 apres simplification :
 (x + 3 + 12) / 3
 
-Expression numéro 3 avant simplification :
-(-4) * 3
-Expression numéro 3 après simplification :
-(-4) * 3
+Expression numero 3 avant simplification :
+((a * b) * c) * (e + f)
+Expression numero 3 apres simplification :
+a * b * c * (e + f)
+
+Expression numero 4 avant simplification :
+13 + ((2 * 5) - (1 / 0))
+Expression numero 4 apres simplification :
+13 + 10 - 1 / 0
 ```
+
+It is also possible to use the program with an OCaml interpreter.
+To do this, use the code.ml file which contains the functions and a series of tests for each of them.
+By default this program should be interpreted with OCaml version 4.08.1, however 4 other OCaml versions are available by uncommenting the line corresponding to your OCaml version.
 
 <a name="en_sk"/>
 
