@@ -35,7 +35,7 @@ Ensuite, le programme attend sur l'entrée standard une suite d'expressiond arit
 Un exemple d'utilisation :
 
 ```shell
-$ ./exec_project
+$ ocamlrun exec_project
 34 56 2 + x * -;
 x 3 + 5 7 + + 3 4 * 1 3 + / /;
 a b * c * e f + *;
@@ -115,7 +115,7 @@ Then the program expects a sequence of semicolon-delimited arithmetic expression
 An example of usage:
 
 ```shell
-$ ./exec_project
+$ ocamlrun exec_project
 34 56 2 + x * -;
 x 3 + 5 7 + + 3 4 * 1 3 + / /;
 a b * c * e f + *;
