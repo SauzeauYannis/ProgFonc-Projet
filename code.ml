@@ -16,9 +16,10 @@
 #load "expression_scanner.cmo";;
 open Expression_scanner;;
 
-(* Pour vérifier si le module est bien chargÃ© *)
+(* Pour vérifier si le module est bien chargé *)
 #show Expression_scanner;;
 
+(* Test des fonctions du module *)
 let _ : token = Add;;            (* Expression_scanner.token = Add *)
 let _ : token = Variable('x');;  (* Expression_scanner.token = Variable 'x' *)
 let _ : token = Number(2);;      (* Expression_scanner.token = Number 2 *)
@@ -30,7 +31,7 @@ string_to_token_list "34 56 2 + x * -;";;  (* Expression_scanner.token list = [N
 (* Chargement du module Stack pour manipuler des piles *)
 open Stack;;
 
-(* CrÃ©ation du type des arbres de syntaxe abstraite *)
+(* Création du type des arbres de syntaxe abstraite *)
 type operator = | Plus | Minus | Mult | Div;;
 type tree =
   | Var of char
@@ -45,14 +46,14 @@ let operator_of_token token =
   | Subtract -> Minus
   | Multiply -> Mult
   | Divide -> Div
-  | _ -> failwith "le token n'est pas convertible en opÃ©rateur";;
+  | _ -> failwith "le token n'est pas convertible en opérateur";;
 
 (* Analyse d'une expression de Lukasiewicz *)
 let parse token_list =
   let stack : tree t = create() in
   let rec parse_aux(token_l : token list): tree =
     match token_l with
-    | [] -> failwith "l'expression de Lukasiewicz est mal formÃ©e"
+    | [] -> failwith "l'expression de Lukasiewicz est mal formée"
     | End::[] -> pop stack
     | hd::tl ->
        match hd with
@@ -70,7 +71,7 @@ let parse token_list =
        | Number(n) ->
           push (Cst(n)) stack;
           parse_aux tl
-       | _ -> failwith "l'expression de Lukasiewicz est mal formÃ©e"
+       | _ -> failwith "l'expression de Lukasiewicz est mal formée"
   in parse_aux token_list
 ;;
 
@@ -95,11 +96,16 @@ let evaluate operator n1 n2 =
   | Plus -> Cst(n1 + n2)
   | Minus -> Cst(n1 - n2)
   | Mult -> Cst(n1 * n2)
-  | Div -> Cst(n1 / n2)
+  | Div ->
+     if n2 <> 0
+     then Cst(n1 / n2)
+     else Binary(operator, Cst(n1), Cst(n2))
 ;;
 
+(* Test d'évaluation d'une sous-expression d'entiers *)
 evaluate Plus 5 9;;
 evaluate Div 8 2;;
+evaluate Div 8 0;;
 
 (* Evaluation d'une sous-expression de variables *)
 let eval_sub_expr operator x y =
@@ -120,6 +126,7 @@ let eval_sub_expr operator x y =
     | _ -> Binary(operator, x, y)
 ;;
 
+(* Test d'évaluation d'une sous-expression de variables *)
 eval_sub_expr Minus (Var('x')) (Var('x'));;
 eval_sub_expr Plus (Cst(0)) (Var('x'));;
 eval_sub_expr Div (Var('x')) (Var('y'));;
@@ -135,6 +142,7 @@ let rec simplification tree =
   | _ -> tree
 ;;
 
+(* Test de l'evaluation d'une sous-expression *)
 simplification (Binary(Mult, Cst(3), Cst(4)));;
 simplification (Binary(Mult, Cst(1), Var('x')));;
 simplification (Binary(Plus, Var('y'), Cst(0)));;
@@ -143,8 +151,6 @@ simplification (Unary(Var('x')));;
 
 simplification (parse (string_to_token_list "34 56 2 + x * -;"));;
 simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
-
-(* TODO: ajouter d'autres tests *)
 
 (* ------------------------------ Affichage des expressions ------------------------------ *)
 
@@ -167,6 +173,7 @@ let string_of_operator op =
   | Div -> " / "
 ;;
 
+(* Test de la conversion d'un operateur en string *)
 string_of_operator Plus;;
 string_of_operator Minus;;
 string_of_operator Mult;;
@@ -175,7 +182,7 @@ string_of_operator Div;;
 (* Ouverture du module Char pour utiliser la fonction 'escaped' *)
 open Char;;
 
-(* Conversion d'un arbre en string *)
+(* Conversion d'un arbre en string sans simplifiaction des parenthèses *)
 let string_of_tree tree =
   let rec string_of_tree_aux tree first =
     match tree with
@@ -189,6 +196,7 @@ let string_of_tree tree =
   in string_of_tree_aux tree true
 ;;
 
+(* Conversion d'un arbre en string avec simplifiaction des parenthèses *)
 let rec string_of_tree_final tree =
   match tree with
   | Cst(n) -> string_of_int n
@@ -207,6 +215,7 @@ let rec string_of_tree_final tree =
         | _ -> (string_of_tree_final x) ^ (string_of_operator op) ^ (string_of_tree_final y)
 ;;
 
+(* Test de la conversion en string *)
 string_of_tree (parse (string_to_token_list "34 56 2 + x * -;"));;
 string_of_tree_final (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 string_of_tree (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
@@ -214,23 +223,23 @@ string_of_tree_final (simplification (parse (string_to_token_list "x 3 + 5 7 + +
 string_of_tree_final (simplification (parse (string_to_token_list "a b * c * e f + *;")));;
 
 
-(* Affichage sur le terminal de l'expression *)
+(* Affichage sur le terminal de l'expression sans simplifiaction des parenthèses *)
 let print_exp tree =
   printf "%s\n" (string_of_tree tree)
 ;;
 
+(* Affichage sur le terminal de l'expression avec simplifiaction des parenthèses *)
 let print_exp_final tree =
   printf "%s\n" (string_of_tree_final tree)
 ;;
 
+(* Test de l'affichage *)
 print_exp (parse (string_to_token_list "34 56 2 + x * -;"));;
 print_exp_final (simplification (parse (string_to_token_list "34 56 2 + x * -;")));;
 print_exp (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;"));;
 print_exp_final (simplification (parse (string_to_token_list "x 3 + 5 7 + + 3 4 * 1 3 + / /;")));;
 
 (* ----------------------------------- Programme final ----------------------------------- *)
-
-string_to_token_list "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;";;
 
 (* Ouvre le module Printf pour effectuer un affichage sur un terminal *)
 open List;;
@@ -258,4 +267,10 @@ let main input =
   (temp_list::token_list)
 ;;
 
-main "34 56 2 + x * -;x 3 + 5 7 + + 3 4 * 1 3 + / /;a b * c * e f + *;";;
+(* Test de la fonction principale *)
+main "34 56 2 + x * -;
+      x 3 + 5 7 + + 3 4 * 1 3 + / /;
+      a b * c * e f + *;
+      13 2 5 * 1 0 / - +;"
+;;
+
