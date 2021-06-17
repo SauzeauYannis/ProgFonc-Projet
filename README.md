@@ -90,7 +90,7 @@ Par défaut ce programme doit être interprété avec la version 4.08.1 d'OCaml,
 
 ### Résultat
 
-Nous avons obtenu la note de ?/20. (Résultat en juin)
+Nous avons obtenu la note de 10/20.
 
 <a name="en"/>
 
@@ -170,4 +170,4 @@ By default this program should be interpreted with OCaml version 4.08.1, however
 
 ### Result
 
-We obtained a score of ?/20. (Result in June)
+We obtained a score of 10/20.
